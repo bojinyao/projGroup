@@ -1,0 +1,21 @@
+1. think of hard example without rowdy group 
+    - more connected graph
+    - each bus can hold less than average degree of number of students
+    - k = #buses = roundup(student / s)
+2. then think of hard problems with the rowdy group 
+
+
+Coloring - buses: number of colors 
+rowdy groups: sub graphs where at least one node with a different color
+
+Some reductions:
+1. Approximate Max 2 SAT
+2. Coloring
+3. Maximally connected sub-graphs
+
+
+Good idea:
+1. use connected components to "reduce" the graph to a smaller graph as H   
+2. Color H 
+3. recover components using the colored H
+4. satisfy S
