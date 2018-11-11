@@ -6,14 +6,14 @@ import os
 # the folder containing all three input
 # size category folders
 ###########################################
-path_to_inputs = "./all_inputs"
+path_to_inputs = "./part-1/inputs"
 
 ###########################################
 # Change this variable if you want
 # your outputs to be put in a 
 # different folder
 ###########################################
-path_to_outputs = "./outputs"
+path_to_outputs = "./part-1/outputs"
 
 def parse_input(folder_name):
     '''
@@ -44,6 +44,8 @@ def parse_input(folder_name):
 
 def solve(graph, num_buses, size_bus, constraints):
     #TODO: Write this method as you like. We'd recommend changing the arguments here as well
+
+    
     return
 
 def main():
