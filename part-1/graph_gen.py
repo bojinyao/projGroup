@@ -13,6 +13,7 @@ plt.show()
 """
 
 # G = nx.generators.random_graphs.dense_gnm_random_graph(30, 50)
-G = nx.generators.random_graphs.gnm_random_graph(300, 100)
+# G = nx.generators.random_graphs.gnm_random_graph(300, 100)
+G = nx.gnp_random_graph(50, 0.3)
 nx.draw(G, with_labels=True, font_weight='bold')
 plt.show()

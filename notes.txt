@@ -19,3 +19,14 @@ Good idea:
 2. Color H 
 3. recover components using the colored H
 4. satisfy S
+
+
+look into other libraries, one that might be free for students 
+
+rowdy groups can be
+    disjoint
+    subsets
+    sparse subsets
+    some what overlap 
+    more overlap 
+    etc
