@@ -6,14 +6,14 @@ import os
 # the folder containing all three input
 # size category folders
 ###########################################
-path_to_inputs = "./part-1/inputs"
+path_to_inputs = "./inputs"
 
 ###########################################
 # Change this variable if you want
 # your outputs to be put in a 
 # different folder
 ###########################################
-path_to_outputs = "./part-1/outputs"
+path_to_outputs = "./outputs"
 
 def parse_input(folder_name):
     '''
@@ -46,7 +46,7 @@ def solve(graph, num_buses, size_bus, constraints):
     #TODO: Write this method as you like. We'd recommend changing the arguments here as well
 
     res = [[] for _ in range(num_buses)]
-    nodes = graph.nodes
+    nodes = list(graph.nodes)
     for i in range(len(nodes)):
         bus_index = i % num_buses
         res[bus_index].append(nodes[i])
@@ -54,41 +54,16 @@ def solve(graph, num_buses, size_bus, constraints):
     return res
 
 def main():
-    '''
-        Main method which iterates over all inputs and calls `solve` on each.
-        The student should modify `solve` to return their solution and modify
-        the portion which writes it to a file to make sure their output is
-        formatted correctly.
-    '''
-    size_categories = ["small", "medium", "large"]
-    if not os.path.isdir(path_to_outputs):
-        os.mkdir(path_to_outputs)
-
+    size_categories = ['small', 'medium', 'large']
     for size in size_categories:
-        category_path = path_to_inputs + "/" + size
-        output_category_path = path_to_outputs + "/" + size
-        category_dir = os.fsencode(category_path)
-        
-        if not os.path.isdir(output_category_path):
-            os.mkdir(output_category_path)
+        graph, num_buses, size_bus, constraints = parse_input(path_to_inputs + '/' + size)
+        solution = solve(graph, num_buses, size_bus, constraints)
+        output_file = open(path_to_outputs + "/" + size + ".out", "w")
+        for lst in solution:
+            output_file.write(str(lst))
+            output_file.write("\n")
 
-        for input_folder in os.listdir(category_dir):
-            input_name = os.fsdecode(input_folder) 
-            graph, num_buses, size_bus, constraints = parse_input(category_path + "/" + input_name)
-            solution = solve(graph, num_buses, size_bus, constraints)
-            output_file = open(output_category_path + "/" + input_name + ".out", "w")
-
-            #TODO: modify this to write your solution to your 
-            #      file properly as it might not be correct to 
-            #      just write the variable solution to a file
-            # output_file.write(solution)
-            for lst in solution:
-                output_file.write(str(lst))
-                output_file.write("\n")
-
-            output_file.close()
-
-if __name__ == '__main__':
-    main()
+        output_file.close()
 
 
+main()
