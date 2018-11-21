@@ -59,11 +59,31 @@ def vertex_cover_partition(graph, nodes):
     prime_nodes = approximation.min_weighted_vertex_cover(graph)
     return ''
 
+
+"""
+Partition a graph using dominating set algorithm
+@param graph: graph itself
+@param nodes: all nodes in the graph (optimization)
+@return a list of lists (of nodes) as a partition of the graph
+"""
 def dominating_set_partition(graph, nodes):
     prime_nodes = nx.dominating_set(graph)
     return ''
 
+"""
+Partition a graph based on nodes with degrees higher than average
+A greedy approach to this problem itself
+@param graph: graph itself
+@param nodes: all nodes in the graph (optimization)
+@return a list of lists (of nodes) as a partition of the graph
+"""
+def vertex_degree_partition(graph, nodes):
+    return ''
+
+##############
+# Global Var #
 algos = [vertex_cover_partition, dominating_set_partition]
+##############
 
 def solve(graph, num_buses, size_bus, constraints):
     #TODO: Write this method as you like. We'd recommend changing the arguments here as well
