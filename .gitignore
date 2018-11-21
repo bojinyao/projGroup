@@ -1,3 +1,7 @@
 # test.gml is only used for testing purposes
 # no need to be uploaded to repo
 test.*
+
+# inputs that do not need to be uploaded to github
+all_inputs/
+all_large/
