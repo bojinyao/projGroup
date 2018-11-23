@@ -46,16 +46,27 @@ def parse_input(folder_name):
 # G = nx.gnp_random_graph(50, 0.6)
 # nx.draw(G, with_labels=True, font_weight='bold')
 # plt.show()
-k = 3
-s = 5
 
-params = open('./test.txt', "w+")
-params.write(str(k) + "\n")
-params.write(str(s) + "\n")
-for lst in [range(3) for _ in range(5)]:
-    params.write(str(list(lst)))
-    params.write('\n')
+import metis
+# G = metis.example_networkx()
+G = nx.gnp_random_graph(500, 0.6)
+(edgecuts, parts) = metis.part_graph(G, 22)
+# colors = ['red','blue','green']
+# for i, p in enumerate(parts):
+#     G.node[i]['color'] = colors[p]
 
-params.close()
+partitions = [[] for _ in range(22)]
 
-print(parse_input('./'))
+all_nodes = list(G.nodes)
+for i in range(G.number_of_nodes()):
+    partitions[parts[i]].append(all_nodes[i])
+
+for i in range(22):
+    print("part {}, length {}: {}".format(i, len(partitions[i]), partitions[i]))
+
+# print(edgecuts)
+
+# print(len(parts))
+# print(max(parts))
+# nx.draw(G, with_labels=True, font_weight='bold')
+# plt.show()

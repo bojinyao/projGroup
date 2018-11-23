@@ -1,6 +1,10 @@
 import networkx as nx
 import os
 
+# extra imports from solver.py
+import metis
+import math
+
 ###########################################
 # Change this variable to the path to 
 # the folder containing all three input
@@ -85,21 +89,39 @@ def vertex_degree_partition(graph, nodes):
 algos = [vertex_cover_partition, dominating_set_partition]
 ##############
 
+
+# if nx.is_connected(graph):
+#         for algorithm in algos: # GLOBAL var used here
+#             partitions = algorithm(graph, nodes)
+
+#     else:
+#         all_components = nx.connected_components(graph)
+#         num_components = nx.is_connected(graph)
+#         for component in all_components:
+#             return 
 def solve(graph, num_buses, size_bus, constraints):
     #TODO: Write this method as you like. We'd recommend changing the arguments here as well
-    nodes = set(graph.nodes)
+    nodes = list(graph.nodes)
+    if num_buses == 1:
+        return [nodes]
+    num_nodes = len(nodes)
+    min_buses_needed = math.ceil(float(num_nodes) / float(size_bus))
+    num_extra_buses = num_buses - min_buses_needed
 
-    if nx.is_connected(graph):
-        #TODO
-        for algorithm in algos: # GLOBAL var used here
-            partitions = algorithm(graph, nodes)
+    # Assign students to mininum number of buses needed to preserve friendships
+    (unused_edgecuts, parts) = metis.part_graph(graph, min_buses_needed)
+    partitions = [[] for _ in range(num_buses)]
+    for i in range(num_nodes):
+        partitions[parts[i]].append(nodes[i])
+
+    # dealing with rowdy groups
+    if num_extra_buses > 0:
+        #do something
 
     else:
-        all_components = nx.connected_components(graph)
-        num_components = nx.is_connected(graph)
-        for component in all_components:
-            return 
+        #do something else
 
+    return partitions
 
 
 

@@ -5,3 +5,4 @@ test.*
 # inputs that do not need to be uploaded to github
 all_inputs/
 all_large/
+all_outputs/

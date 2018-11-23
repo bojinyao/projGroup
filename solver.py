@@ -1,19 +1,23 @@
 import networkx as nx
 import os
 
+import metis
+import math
+import output_scorer as scorer
+
 ###########################################
 # Change this variable to the path to 
 # the folder containing all three input
 # size category folders
 ###########################################
-path_to_inputs = "./part-1/inputs"
+path_to_inputs = "./all_inputs"
 
 ###########################################
 # Change this variable if you want
 # your outputs to be put in a 
 # different folder
 ###########################################
-path_to_outputs = "./part-1/outputs"
+path_to_outputs = "./all_outputs"
 
 def parse_input(folder_name):
     '''
@@ -42,16 +46,36 @@ def parse_input(folder_name):
 
     return graph, num_buses, size_bus, constraints
 
-def solve(graph, num_buses, size_bus, constraints):
+def solve(input_name, graph, num_buses, size_bus, constraints):
     #TODO: Write this method as you like. We'd recommend changing the arguments here as well
-
-    res = [[] for _ in range(num_buses)]
-    nodes = graph.nodes
-    for i in range(len(nodes)):
-        bus_index = i % num_buses
-        res[bus_index].append(nodes[i])
     
-    return res
+    nodes = list(graph.nodes)
+    if num_buses == 1: # special case for one group...
+        return [nodes]
+    num_nodes = len(nodes)
+
+    # PARTITIONING: 
+    # Assign students to mininum number of buses needed to preserve friendships
+    (unused_edgecuts, parts) = metis.part_graph(graph, num_buses)
+
+    # TAKING CARE OF ROWDY GROUPS
+    buses_used = max(parts) + 1
+    num_extra_buses = num_buses - buses_used
+
+    partitions = [[] for _ in range(num_buses)]
+    for i in range(num_nodes):
+        partitions[parts[i]].append(nodes[i])
+    
+
+    # RESULT CHECK
+    for i in range(num_buses):
+        l = len(partitions[i])
+        if l == 0:
+            print(f"{input_name} line {i} is an empty bus")
+        if l > size_bus:
+            print(f"{input_name} line {i} has too many nodes")
+    return partitions
+    
 
 def main():
     '''
@@ -60,11 +84,18 @@ def main():
         the portion which writes it to a file to make sure their output is
         formatted correctly.
     '''
-    size_categories = ["small", "medium", "large"]
+    # size_categories = ["small", "medium", "large"]
+    size_categories = ["small"]
+    file_counts = {"small": 331, "medium": 331, "large": 100}
     if not os.path.isdir(path_to_outputs):
         os.mkdir(path_to_outputs)
 
     for size in size_categories:
+        # Print stuff start >
+        print(f"Directory: {size}, Files: {file_counts[size]}")
+        count = 0
+        # Print stuff end <
+
         category_path = path_to_inputs + "/" + size
         output_category_path = path_to_outputs + "/" + size
         category_dir = os.fsencode(category_path)
@@ -75,7 +106,8 @@ def main():
         for input_folder in os.listdir(category_dir):
             input_name = os.fsdecode(input_folder) 
             graph, num_buses, size_bus, constraints = parse_input(category_path + "/" + input_name)
-            solution = solve(graph, num_buses, size_bus, constraints)
+            # print("Working on {}".format(input_name))
+            solution = solve(input_name, graph, num_buses, size_bus, constraints)
             output_file = open(output_category_path + "/" + input_name + ".out", "w")
 
             #TODO: modify this to write your solution to your 
@@ -87,6 +119,12 @@ def main():
                 output_file.write("\n")
 
             output_file.close()
+
+            # Print stuff start > uncomment when actually running the algorithm
+            count += 1 
+            print(f"Finished {count}/{file_counts[size]}", end="\r")
+        print(f"Done with {size}.")
+        # Print stuff end <
 
 if __name__ == '__main__':
     main()
