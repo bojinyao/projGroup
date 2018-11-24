@@ -46,10 +46,15 @@ def parse_input(folder_name):
 
     return graph, num_buses, size_bus, constraints
 
-def transfer_node(partitions, node, from_bus, to_bus):
-    partitions[from_bus].remove(node)
-    partitions[to_bus].add(node)
 
+def transfer_node(partitions, node, from_bus_index, to_bus_index):
+    """Transfer node from_bus_index to_bus_index
+    """
+    partitions[from_bus_index].remove(node)
+    partitions[to_bus_index].add(node)
+
+
+# Temporary Global Vars
 DISPLAYCOUNT = False
 SHOWBUSINFO = False
 
@@ -78,20 +83,32 @@ def solve(input_name, graph, num_buses, size_bus, constraints):
         for bus in partitions:
             for group in rowdy_groups:
                 if group.issubset(bus):
+                    # if rowdy group present, send one with min edges to an empty bus
+                    # fill up empty buses first this way
                     transfer = min(group, key=lambda n: node_degrees[n])
                     bus.remove(transfer)
                     dest_bus = partitions[extra_buses[bus_select % num_extra_buses]]
                     dest_bus.add(transfer)
                     bus_select += 1
-                    print(f"In {input_name} Transferred {transfer} to {dest_bus}")
-    # else:
-    #     for bus in partitions:
-    #         for group in rowdy_groups:
-    #             if group.issubset(bus):
-    #                 return
+                    # print(f"In {input_name} Transferred {transfer} to {dest_bus}")
+    else:
+        for bus_index in range(num_buses):
+            curr_bus = partitions[bus_index]
+            for group_index in range(len(rowdy_groups)):
+                curr_group = rowdy_groups[group_index]
+                if curr_group.issubset(curr_bus):
+                    # if rowdy group present, switch the one with min edges
+                    # with min edge one from previous bus (mod)
+                    transfer = min(curr_group, key=lambda n: node_degrees[n])
+                    prev_bus_index = bus_index - 1
+                    transfer_node(partitions, transfer, bus_index, prev_bus_index)
 
+                    back_transfer = min(partitions[prev_bus_index], key=lambda n: node_degrees[n])
+                    transfer_node(partitions, back_transfer, prev_bus_index, bus_index)
+                    
+                    print(f"In {input_name}, {transfer} <-> {back_transfer} switched bus: {bus_index}, {prev_bus_index}")
     # Making sure every bus has the right number of nodes
-
+    
     # RESULT CHECK
     if SHOWBUSINFO:
         for i in range(num_buses):
