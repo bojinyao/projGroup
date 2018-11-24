@@ -46,34 +46,60 @@ def parse_input(folder_name):
 
     return graph, num_buses, size_bus, constraints
 
+def transfer_node(partitions, node, from_bus, to_bus):
+    partitions[from_bus].remove(node)
+    partitions[to_bus].add(node)
+
+DISPLAYCOUNT = False
+SHOWBUSINFO = False
+
 def solve(input_name, graph, num_buses, size_bus, constraints):
     #TODO: Write this method as you like. We'd recommend changing the arguments here as well
-    
     nodes = list(graph.nodes)
     if num_buses == 1: # special case for one group...
         return [nodes]
     num_nodes = len(nodes)
-
     # PARTITIONING: 
     # Assign students to mininum number of buses needed to preserve friendships
     (unused_edgecuts, parts) = metis.part_graph(graph, num_buses)
+    partitions = [set() for _ in range(num_buses)]
+    for i in range(num_nodes):
+        partitions[parts[i]].add(nodes[i])
 
     # TAKING CARE OF ROWDY GROUPS
-    buses_used = max(parts) + 1
-    num_extra_buses = num_buses - buses_used
-
-    partitions = [[] for _ in range(num_buses)]
-    for i in range(num_nodes):
-        partitions[parts[i]].append(nodes[i])
+    node_degrees = {n : graph.degree[n] for n in nodes}
+    extra_buses = [i for i in range(num_buses) if len(partitions[i]) == 0] # indices of empty buses
+    num_extra_buses = len(extra_buses)
+    buses_used = num_buses - num_extra_buses
+    rowdy_groups = [set(group) for group in constraints]
     
+    if num_extra_buses > 0:     
+        bus_select = 0
+        for bus in partitions:
+            for group in rowdy_groups:
+                if group.issubset(bus):
+                    transfer = min(group, key=lambda n: node_degrees[n])
+                    bus.remove(transfer)
+                    dest_bus = partitions[extra_buses[bus_select % num_extra_buses]]
+                    dest_bus.add(transfer)
+                    bus_select += 1
+                    print(f"In {input_name} Transferred {transfer} to {dest_bus}")
+    # else:
+    #     for bus in partitions:
+    #         for group in rowdy_groups:
+    #             if group.issubset(bus):
+    #                 return
+
+    # Making sure every bus has the right number of nodes
 
     # RESULT CHECK
-    for i in range(num_buses):
-        l = len(partitions[i])
-        if l == 0:
-            print(f"{input_name} line {i} is an empty bus")
-        if l > size_bus:
-            print(f"{input_name} line {i} has too many nodes")
+    if SHOWBUSINFO:
+        for i in range(num_buses):
+            l = len(partitions[i])
+            if l == 0:
+                print(f"{input_name} line {i} is an empty bus")
+            if l > size_bus:
+                print(f"{input_name} line {i} has too many nodes")
     return partitions
     
 
@@ -115,14 +141,15 @@ def main():
             #      just write the variable solution to a file
             # output_file.write(solution)
             for lst in solution:
-                output_file.write(str(lst))
+                output_file.write(str(list(lst)))
                 output_file.write("\n")
 
             output_file.close()
 
             # Print stuff start > uncomment when actually running the algorithm
             count += 1 
-            print(f"Finished {count}/{file_counts[size]}", end="\r")
+            if DISPLAYCOUNT:
+                print(f"Finished {count}/{file_counts[size]}", end="\r")
         print(f"Done with {size}.")
         # Print stuff end <
 

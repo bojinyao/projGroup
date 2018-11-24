@@ -6,3 +6,4 @@ test.*
 all_inputs/
 all_large/
 all_outputs/
+__pycache__/
