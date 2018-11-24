@@ -114,14 +114,6 @@ def solve(graph, num_buses, size_bus, constraints):
     for i in range(num_nodes):
         partitions[parts[i]].append(nodes[i])
 
-    # dealing with rowdy groups
-    if num_extra_buses > 0:
-        #do something
-
-    else:
-        #do something else
-
-    return partitions
 
 
 
