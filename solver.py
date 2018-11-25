@@ -4,6 +4,7 @@ import os
 import metis
 import math
 import output_scorer as scorer
+import sys
 
 ###########################################
 # Change this variable to the path to 
@@ -54,12 +55,12 @@ def transfer_node_w_index(partitions, node, from_bus_index, to_bus_index):
     partitions[from_bus_index].remove(node)
     partitions[to_bus_index].add(node)
 
-def transfer_node(node, from_bus, to_bus):
+def transfer_node(node, from_set, to_set):
     """[Custom] node from_bus to_bus, no indices needed
     returns None
     """
-    from_bus.remove(node)
-    to_bus.add(node)
+    from_set.remove(node)
+    to_set.add(node)
 
 def rowdy_group_presence(nodes, rowdy_groups):
     """[Custom] Calculate number of groups each node belongs to
@@ -94,22 +95,47 @@ def solve(input_name, graph, num_buses, size_bus, constraints):
     presence_counts = rowdy_group_presence(nodes, rowdy_groups)
 
     # Making sure every bus has the right number of nodes
-    extra_buses = [i for i in range(num_buses) if len(partitions[i]) == 0]
-    num_extra_buses = len(extra_buses)
-    buses_used = num_buses - num_extra_buses
-    bus_overflows = [[] for _ in range(num_buses)]
+    empty_buses_indices = [i for i in range(num_buses) if len(partitions[i]) == 0]
+    num_empty_buses = len(empty_buses_indices)
+    buses_used = num_buses - num_empty_buses
+    bus_overflows = [[] for _ in range(num_buses)] #unused keep around for future use 
+    all_overflows = set()
+    num_overflows = 0
     for bus_index in range(num_buses):
         curr_bus = partitions[bus_index]
         if len(curr_bus) > size_bus:
             num_over = len(curr_bus) - size_bus
             cutoff_nodes = sorted(list(curr_bus), key=lambda n: presence_counts[n], reverse=True)[0:num_over]
             for n in cutoff_nodes:
+                # make sure no bus has too many nodes
                 curr_bus.remove(n)
             bus_overflows[bus_index].extend(cutoff_nodes)
-    
-    cur_bus_sizes = [len(partitions[i]) for i in range(num_buses)]
-    # Greedily distribute the cutoff nodes starting from buses of smallest sizes (least like to create rowdy group)
+            all_overflows.update(cutoff_nodes)
+    num_overflows = len(all_overflows)
+    # Greedily distribute the cutoff nodes starting from buses of smallest sizes (least likely to create rowdy group)
+    # make sure no bus is empty  
+    if num_empty_buses > 0:
+        if num_overflows < num_empty_buses:
+            # exhaust overflows first
+            empty_buses_select = 0
+            while empty_buses_select < num_overflows:
+                to_bus = partitions[empty_buses_indices[empty_buses_select]]
+                to_bus.add(all_overflows.pop())
+                empty_buses_select += 1
+            # fill up rest of the empty buses
+            counter = 0
+            while empty_buses_select < num_empty_buses:
+                curr_bus = partitions[counter % num_buses]
+                if len(curr_bus) > 1:
+                    transfer = min(curr_bus, key=lambda n: node_degrees[n])
+                    transfer_node_w_index(partitions, transfer, counter % num_buses, empty_buses_select)
+                    empty_buses_select += 1
+                counter += 1
+        # else:
 
+                
+
+    cur_bus_sizes = [len(partitions[i]) for i in range(num_buses)]
     # TAKING CARE OF ROWDY GROUPS
     # old insert ->
     for bus_index in range(num_buses):
