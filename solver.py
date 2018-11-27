@@ -19,7 +19,7 @@ path_to_inputs = "./all_inputs"
 # your outputs to be put in a 
 # different folder
 ###########################################
-path_to_outputs = "./all_outputs"
+path_to_outputs = "../all_outputs"
 
 def parse_input(folder_name):
     '''
